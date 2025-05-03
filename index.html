@@ -94,8 +94,9 @@
 <body>
     <div class="container">
         <h1>第一步：音频播放</h1>
-        <audio id="myAudio" controls>
+        <audio id="myAudio" controls controlslist="nodownload" preload="auto">
             <source src="audio.mp3" type="audio/mpeg">
+            <source src="audio.ogg" type="audio/ogg">
             您的浏览器不支持音频播放
         </audio>
         <div class="controls">
@@ -154,19 +155,31 @@
         const optionsContainer = document.getElementById('optionsContainer');
         const submitBtn = document.getElementById('submitBtn');
         
-        // 监听音频播放事件
-        audio.addEventListener('play', () => {
+        // 初始化时直接启用选项交互
+        document.addEventListener('DOMContentLoaded', () => {
             optionsContainer.style.pointerEvents = 'auto';
             optionsContainer.style.opacity = '1';
             submitBtn.disabled = false;
-            // 启用所有单选按钮
             document.querySelectorAll('input[type="radio"]').forEach(radio => {
                 radio.disabled = false;
             });
         });
-        
-        function playAudio() {
-            audio.play();
+
+        // 添加iOS专用触摸事件处理
+        document.body.addEventListener('touchstart', function() {}, false);
+
+        function playAudio(event) {
+            event.preventDefault();
+            audio.load();
+            audio.play().catch(error => {
+                // 直接激活选项交互
+                optionsContainer.style.pointerEvents = 'auto';
+                optionsContainer.style.opacity = '1';
+                submitBtn.disabled = false;
+                document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                    radio.disabled = false;
+                });
+            });
         }
 
         function pauseAudio() {
