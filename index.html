@@ -168,18 +168,32 @@
         // 添加iOS专用触摸事件处理
         document.body.addEventListener('touchstart', function() {}, false);
 
-        function playAudio(event) {
-            event.preventDefault();
-            audio.load();
-            audio.play().catch(error => {
-                // 直接激活选项交互
-                optionsContainer.style.pointerEvents = 'auto';
-                optionsContainer.style.opacity = '1';
-                submitBtn.disabled = false;
-                document.querySelectorAll('input[type="radio"]').forEach(radio => {
-                    radio.disabled = false;
+        // 初始化音频预加载
+        audio.load();
+        
+        function playAudio() {
+            const playPromise = audio.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    // 播放成功自动激活选项
+                    optionsContainer.style.pointerEvents = 'auto';
+                    optionsContainer.style.opacity = '1';
+                    submitBtn.disabled = false;
+                    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                        radio.disabled = false;
+                    });
+                }).catch(error => {
+                    // 处理iOS自动播放限制
+                    if(error.name === 'NotAllowedError') {
+                        alert('请点击屏幕任意位置后再次点击播放按钮');
+                        document.body.addEventListener('click', function handler() {
+                            audio.play();
+                            this.removeEventListener('click', handler);
+                        }, {once: true});
+                    }
                 });
-            });
+            }
         }
 
         function pauseAudio() {
