@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>杭州话方言测试</title>
+    <style>
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px auto;
+                padding: 10px;
+            }
+        .options {
+            margin: 20px 0;
+            text-align: left;
+            display: inline-block;
+            width: 100%;
+        }
+        .option {
+            margin: 10px 0;
+            padding: 12px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            transition: background 0.3s ease;
+        }
+        .option:hover {
+            background: #e9ecef;
+        }
+        .option input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+        button {
+                padding: 15px 30px;
+                margin: 5px;
+                font-size: 14px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+        }
+        .options {
+            margin: 20px 0;
+            text-align: left;
+            display: inline-block;
+            width: 100%;
+        }
+        .option {
+            margin: 10px 0;
+            padding: 12px;
+            border-radius: 8px;
+            background: #f8f9fa;
+            transition: background 0.3s ease;
+        }
+        .option:hover {
+            background: #e9ecef;
+        }
+        .option input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+        .container {
+            max-width: 100%;
+            margin: 30px auto;
+            padding: 15px;
+            text-align: center;
+        }
+        audio {
+            margin: 15px 0;
+            width: 100%;
+            min-width: 280px;
+        }
+        .controls {
+            margin-top: 20px;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s;
+            touch-action: manipulation;
+            min-width: 120px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>第一步：音频播放</h1>
+        <audio id="myAudio" controls>
+            <source src="audio.mp3" type="audio/mpeg">
+            您的浏览器不支持音频播放
+        </audio>
+        <div class="controls">
+            <button onclick="playAudio()">播放</button>
+            <button onclick="pauseAudio()">暂停</button>
+        </div>
+        <div class="options" id="optionsContainer" style="pointer-events: none; opacity: 0.6;">
+            <div class="option">
+                <input type="radio" name="quiz" id="opt1" disabled>
+                <label for="opt1">A. 小孩子，哥哥弟弟，在一起，就走了</label>
+            </div>
+            <div class="option">
+                <input type="radio" name="quiz" id="opt2" disabled>
+                <label for="opt2">B. 小鸭，各个，都不知道，游哪里了</label>
+            </div>
+            <div class="option">
+                <input type="radio" name="quiz" id="opt3" disabled>
+                <label for="opt3">C. 小孩子，在一起玩，玩的不好就打架了</label>
+            </div>
+            <div class="option">
+                <input type="radio" name="quiz" id="opt4" disabled>
+                <label for="opt4">D. 小丫，哥哥，不知道怎么了，就跑了</label>
+            </div>
+        </div>
+        <p id="correctAnswer" style="display:none;">小孩子，在一起玩，玩的不好就打架了</p>
+        <div class="controls">
+            <button onclick="checkAnswer()" id="submitBtn" disabled>提交答案</button>
+        </div>
+    </div>
+
+    <script>
+        // 随机排序选项
+        function shuffleOptions() {
+            const container = document.querySelector('.options');
+            const options = Array.from(container.children);
+            
+            // Fisher-Yates洗牌算法
+            for (let i = options.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [options[i], options[j]] = [options[j], options[i]];
+            }
+            
+            // 更新选项顺序并重置ABCD标签
+            container.innerHTML = '';
+            options.forEach((option, index) => {
+                const label = option.querySelector('label');
+                label.textContent = `${String.fromCharCode(65 + index)}. ${label.textContent.split('. ')[1]}`;
+                container.appendChild(option);
+            });
+        }
+
+        // 初始化时随机排序
+        window.addEventListener('DOMContentLoaded', shuffleOptions);
+
+        const audio = document.getElementById('myAudio');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        // 监听音频播放事件
+        audio.addEventListener('play', () => {
+            optionsContainer.style.pointerEvents = 'auto';
+            optionsContainer.style.opacity = '1';
+            submitBtn.disabled = false;
+            // 启用所有单选按钮
+            document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.disabled = false;
+            });
+        });
+        
+        function playAudio() {
+            audio.play();
+        }
+
+        function pauseAudio() {
+            audio.pause();
+        }
+        function checkAnswer() {
+            const selected = document.querySelector('input[name="quiz"]:checked');
+            const correctAnswer = document.getElementById('correctAnswer').textContent;
+            const resultDiv = document.getElementById('resultMessage');
+            const qrCode = document.getElementById('qrCode');
+
+            if (!selected) {
+                alert('请先选择一个答案');
+                return;
+            }
+
+            const userAnswer = selected.nextElementSibling.textContent.split('. ')[1];
+            const isCorrect = userAnswer === correctAnswer;
+
+            if (isCorrect) {
+                // 跳转到微信二维码页面
+                location.replace('WeChat.html');
+            } else {
+            // 跳转到结束页面
+            location.replace('end.html');
+            }
+        }
+
+    </script>
+    <div id="qrCode" class="qr-container">
+        <div id="resultMessage"></div>
+    </div>
+</body>
+</html>
