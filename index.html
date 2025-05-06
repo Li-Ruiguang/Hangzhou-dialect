@@ -3,13 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- DNS预解析 & 预连接 -->
+    <link rel="dns-prefetch" href="https://cdn.bootcdn.net">
+    <link rel="preconnect" href="https://cdn.bootcdn.net" crossorigin>
+    <link rel="dns-prefetch" href="https://lf6-cdn-tos.bytecdntp.com">
+    <link rel="preconnect" href="https://lf6-cdn-tos.bytecdntp.com" crossorigin>
+    <link rel="dns-prefetch" href="https://github.com">
+    <link rel="preconnect" href="https://github.com" crossorigin>
+    <link rel="dns-prefetch" href="https://li-ruiguang.github.io">
+    <link rel="preconnect" href="https://li-ruiguang.github.io" crossorigin>
     <title>杭州话方言测试</title>
+    <!-- 国内CDN加速 -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js" crossorigin="anonymous"></script>
+    <!-- 关键资源预加载 -->
+    <link rel="preload" href="audio.mp3" as="audio" type="audio/mpeg" importance="high">
+    <link rel="prefetch" href="WeChat.html" as="document">
+    <link rel="prefetch" href="end.html" as="document">
     <style>
-        @media (max-width: 768px) {
-            .container {
-                margin: 20px auto;
-                padding: 10px;
-            }
+        .container {
+            max-width: 100%;
+            margin: 30px auto;
+            padding: 15px;
+            text-align: center;
+        }
         .options {
             margin: 20px 0;
             text-align: left;
@@ -22,6 +39,7 @@
             border-radius: 8px;
             background: #f8f9fa;
             transition: background 0.3s ease;
+            cursor: pointer;
         }
         .option:hover {
             background: #e9ecef;
@@ -29,8 +47,35 @@
         .option input[type="radio"] {
             margin-right: 10px;
             transform: scale(1.2);
+            vertical-align: middle;
+        }
+        audio {
+            margin: 15px 0;
+            width: 100%;
+            min-width: 280px;
         }
         button {
+            padding: 12px 24px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s;
+            touch-action: manipulation;
+            min-width: 120px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        @media (max-width: 768px) {
+            .container {
+                margin: 20px auto;
+                padding: 10px;
+            }
+            button {
                 padding: 15px 30px;
                 margin: 5px;
                 font-size: 14px;
@@ -38,26 +83,6 @@
             h1 {
                 font-size: 24px;
             }
-        }
-        .options {
-            margin: 20px 0;
-            text-align: left;
-            display: inline-block;
-            width: 100%;
-        }
-        .option {
-            margin: 10px 0;
-            padding: 12px;
-            border-radius: 8px;
-            background: #f8f9fa;
-            transition: background 0.3s ease;
-        }
-        .option:hover {
-            background: #e9ecef;
-        }
-        .option input[type="radio"] {
-            margin-right: 10px;
-            transform: scale(1.2);
         }
         .container {
             max-width: 100%;
@@ -96,14 +121,13 @@
         <h1>第一步：音频播放</h1>
         <audio id="myAudio" controls controlslist="nodownload" preload="auto">
             <source src="audio.mp3" type="audio/mpeg">
-            <source src="audio.ogg" type="audio/ogg">
             您的浏览器不支持音频播放
         </audio>
         <div class="controls">
             <button onclick="playAudio()">播放</button>
             <button onclick="pauseAudio()">暂停</button>
         </div>
-        <div class="options" id="optionsContainer" style="pointer-events: none; opacity: 0.6;">
+        <div class="options" id="optionsContainer">
             <div class="option">
                 <input type="radio" name="quiz" id="opt1" disabled>
                 <label for="opt1">A. 小孩子，哥哥弟弟，在一起，就走了</label>
@@ -155,45 +179,16 @@
         const optionsContainer = document.getElementById('optionsContainer');
         const submitBtn = document.getElementById('submitBtn');
         
-        // 初始化时直接启用选项交互
+        // 初始化交互状态
         document.addEventListener('DOMContentLoaded', () => {
-            optionsContainer.style.pointerEvents = 'auto';
-            optionsContainer.style.opacity = '1';
             submitBtn.disabled = false;
             document.querySelectorAll('input[type="radio"]').forEach(radio => {
                 radio.disabled = false;
             });
         });
 
-        // 添加iOS专用触摸事件处理
-        document.body.addEventListener('touchstart', function() {}, false);
-
-        // 初始化音频预加载
-        audio.load();
-        
         function playAudio() {
-            const playPromise = audio.play();
-            
-            if (playPromise !== undefined) {
-                playPromise.then(_ => {
-                    // 播放成功自动激活选项
-                    optionsContainer.style.pointerEvents = 'auto';
-                    optionsContainer.style.opacity = '1';
-                    submitBtn.disabled = false;
-                    document.querySelectorAll('input[type="radio"]').forEach(radio => {
-                        radio.disabled = false;
-                    });
-                }).catch(error => {
-                    // 处理iOS自动播放限制
-                    if(error.name === 'NotAllowedError') {
-                        alert('请点击屏幕任意位置后再次点击播放按钮');
-                        document.body.addEventListener('click', function handler() {
-                            audio.play();
-                            this.removeEventListener('click', handler);
-                        }, {once: true});
-                    }
-                });
-            }
+            audio.play().catch(() => {}); // 简化播放逻辑
         }
 
         function pauseAudio() {
@@ -202,8 +197,6 @@
         function checkAnswer() {
             const selected = document.querySelector('input[name="quiz"]:checked');
             const correctAnswer = document.getElementById('correctAnswer').textContent;
-            const resultDiv = document.getElementById('resultMessage');
-            const qrCode = document.getElementById('qrCode');
 
             if (!selected) {
                 alert('请先选择一个答案');
