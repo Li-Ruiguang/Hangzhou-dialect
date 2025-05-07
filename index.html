@@ -17,7 +17,7 @@
     <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js" crossorigin="anonymous"></script>
     <!-- 关键资源预加载 -->
-    <link rel="preload" href="audio.mp3" as="audio" type="audio/mpeg" importance="high">
+    <link rel="preload" href="mp3/audio.mp3" as="audio" type="audio/mpeg" importance="high"> 
     <link rel="prefetch" href="WeChat.html" as="document">
     <link rel="prefetch" href="end.html" as="document">
     <style>
@@ -119,8 +119,8 @@
 <body>
     <div class="container">
         <h1>第一步：音频播放</h1>
-        <audio id="myAudio" controls controlslist="nodownload" preload="auto">
-            <source src="audio.mp3" type="audio/mpeg">
+        <audio id="myAudio" controls controlslist="nodownload">
+            <source src="mp3/audio.mp3" type="audio/mpeg">
             您的浏览器不支持音频播放
         </audio>
         <div class="controls">
